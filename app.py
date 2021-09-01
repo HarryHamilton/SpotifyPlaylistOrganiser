@@ -40,7 +40,7 @@ def getTracks():
         return redirect("/")  # Redirect user to login page if they aren't logged in
 
     sp = spotipy.Spotify(auth=token_info["access_token"])
-    return sp.current_user_saved_tracks(limit=50, offset=0)
+    return sp.current_user_top_tracks(limit=20, offset=0, time_range='medium_term')
 
 def get_token():
     """ Ensures valid token data exists.
@@ -68,5 +68,10 @@ def create_spotify_oauth():
         client_id="",
         client_secret="",
         redirect_uri=url_for("redirectPage", _external=True),
-        scope="user-library-read"
+        scope="ugc-image-upload, user-library-read, playlist-modify-private, playlist-read-private, "
+              "playlist-modify-public, "
+              "playlist-read-collaborative, user-library-modify, user-read-playback-position, "
+              "user-read-recently-played, user-read-private, user-read-email, user-read-playback-state, "
+              "user-modify-playback-state, user-read-currently-playing, user-top-read, app-remote-control, streaming, "
+              "user-follow-modify, user-follow-read "
     )
