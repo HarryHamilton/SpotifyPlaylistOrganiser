@@ -37,8 +37,10 @@ def getTracks():
         token_info = get_token()
     except:
         print("User not logged in")
-        redirect("/")  # Redirect user to login page if they aren't logged in
+        return redirect("/")  # Redirect user to login page if they aren't logged in
 
+    sp = spotipy.Spotify(auth=token_info["access_token"])
+    return sp.current_user_saved_tracks(limit=50, offset=0)
 
 def get_token():
     """ Ensures valid token data exists.
