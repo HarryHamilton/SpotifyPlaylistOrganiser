@@ -1,8 +1,9 @@
 import time
-
 from flask import Flask, request, url_for, session, redirect
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+import pprint
+
 import secrets
 
 app = Flask(__name__)
@@ -28,7 +29,9 @@ def redirectPage():
     code = request.args.get("code")
     token_info = sp_oath.get_access_token(code)
     session[TOKEN_INFO] = token_info
-    return redirect(url_for("getTracks", _external=True),)
+
+    return redirect(url_for("getTracks", _external=True), )
+
 
 
 @app.route("/getTracks")
@@ -40,7 +43,20 @@ def getTracks():
         return redirect("/")  # Redirect user to login page if they aren't logged in
 
     sp = spotipy.Spotify(auth=token_info["access_token"])
-    return sp.current_user_top_tracks(limit=20, offset=0, time_range='medium_term')
+
+    result = sp.current_user_playlists(limit=50)
+    users_saved_followed_playlists = []  # Array of playlist URI's that the user follows/owns
+    while result:
+        for i, playlist in enumerate(result['items']):
+            print("%4d %s %s" % (i + 1 + result['offset'], playlist['uri'], playlist['name']))
+            users_saved_followed_playlists.append(playlist['uri'])
+        if result['next']:
+            result = sp.next(result)
+        else:
+            result = None
+    print(users_saved_followed_playlists)
+    return "results in console"
+
 
 def get_token():
     """ Ensures valid token data exists.
