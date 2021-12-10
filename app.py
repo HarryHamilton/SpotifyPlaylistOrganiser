@@ -3,11 +3,10 @@ from flask import Flask, request, url_for, session, redirect
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import pprint
-
 import secrets
 
 app = Flask(__name__)
-app.secret_key = "segerghergerg"  # Random string used to sign the session
+app.secret_key = "aergaergaergaergaerg"  # Random string used to sign the session
 app.config["SESSION_COOKIE_NAME"] = "Spotify Playlist Organiser"
 TOKEN_INFO = "token_info"
 
@@ -50,44 +49,23 @@ def getTracks():
     all_playlists = sp.current_user_playlists(limit=50)
     uris_of_saved_followed_playlists = []  # Array of playlist URI's that the user follows/owns
     while all_playlists:
+        print("yep")
         for i, playlist in enumerate(all_playlists['items']):
-            #print("%4d %s %s" % (i + 1 + all_playlists['offset'], playlist['uri'], playlist['name']))
+            #print("%4d %s %s" % (i + 1 + all_playlists['offset'], playlist['uri'], playlist['name']))  # Pretty print the users playlists
             uris_of_saved_followed_playlists.append(playlist['uri'])
         if all_playlists['next']:
             all_playlists = sp.next(all_playlists)
         else:
             break
 
-    for current_playlist_uri in uris_of_saved_followed_playlists:
+
+    # Checks who the owner of the playlist is and removes it from the list if its not our user
+    for current_playlist_uri in uris_of_saved_followed_playlists[:]:
         current_playlist_owner = (sp.playlist(playlist_id=current_playlist_uri, fields="owner.uri"))  # Retrieves URI of owner of playlist
-        print("hi")
         if str(current_playlist_owner) != ("{'owner': {'uri': '%s'}" % current_user_uri + "}"):
-            #print("Len before: ")
-            #print(len(uris_of_saved_followed_playlists))
-            uris_of_saved_followed_playlists.remove(str(current_playlist_uri))
-            #print("Len after: ")
-            #print(len(uris_of_saved_followed_playlists))
+            uris_of_saved_followed_playlists.remove(current_playlist_uri)
 
-    # Prints the names of the owners of the final playlists, for testing purposes to check if the code block
-    # above is working correctly
-    #for x in uris_of_saved_followed_playlists:
-        #print("Len final: ")
-        #print(len(uris_of_saved_followed_playlists))
-        #print(sp.playlist(playlist_id=x, fields="owner.uri"))
 
-    return "results in console"
-
-    # To work on:
-    # Struggling to get the program to delete the playlists that the user doesn't own from the master array.
-    # I think the problem is with the .remove line, as the code DOES seem to be entering the if statement block
-    # When looking at the length of the array that stores ALL playlists (followed/created), it has 132 elements,
-    # which is the correct number of playlists that i do follow/own.
-    # However, after the code has ran, the list that is supposed to store just the playlists I OWN has 99 elements,
-    # when is should be 79. This tells me that not ALL playlists are being removed. The code must not be
-    # Looping through the master list enough. Testing shows it is looping through the list 99 times, when in fact
-    # it should be 130 something times.
-    # I dont think it is anything to do with the spotify API, as I am getting a '200' response, which indicates
-    # that the request was carried out successfully.
 
 
 def get_token():
@@ -112,8 +90,8 @@ def get_token():
 
 def create_spotify_oauth():
     return SpotifyOAuth(
-        client_id="a98aa14f0ffc4cff901798ddc9014476",
-        client_secret="d99e0b64d1fe43e1926ceb97d6a0ccf8",
+        client_id="",
+        client_secret="",
         redirect_uri=url_for("redirectPage", _external=True),
         scope="ugc-image-upload, user-library-read, playlist-modify-private, playlist-read-private, "
               "playlist-modify-public, "
